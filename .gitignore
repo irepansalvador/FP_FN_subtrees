@@ -1,0 +1,5 @@
+No_InterTarget/WD_cluster/*
+No_InterTarget/Inferred_trees/*
+No_InterTarget/tmp/*
+*.o
+No_InterTarget/REF_trees/*
