@@ -44,7 +44,12 @@ date
 for (( i=$SGE_TASK_ID; i<$SGE_TASK_ID+100; i++ ))
 do
 
-  p=`sed -n ${i}p $paramfile | awk '{print $1}'`
+  for (( d=1; d<11; d++))
+    do
+    gt=$((2**($d-1)))
+    lt=$(((2**($d))+1))
+
+  p=`sed -n t${i}_d${d}p $paramfile | awk '{print $1}'`
   out=${p:0:${#p} - 3} # get the name of the tree and remove the ".nw"
   match=${out}_match
 
@@ -54,17 +59,17 @@ do
   $script1 --induce --tree ../REF_trees/16div_full_REF.nw --tree_labels ../Inferred_trees/${out}.nw --quiet --output ../REF_trees/${out}_REF
 
   echo "3 extract incongruent subtrees"  
-  $script1 --difftree ../Inferred_trees/${out}.nw --tree ../REF_trees/${out}_REF --output ${i} --ultrametric --extract --filter_lt 3 --filter_gt 1 --quiet 2>../Inferred_trees/${match}
-  rm ${i}.1.svg
+  $script1 --difftree ../Inferred_trees/${out}.nw --tree ../REF_trees/${out}_REF --output t${i}_d${d} --ultrametric --extract --filter_lt ${lt} --filter_gt ${gt} --quiet 2>../Inferred_trees/${match}
+  rm t${i}_d${d}.1.svg
 
   echo "4 pruned INFERRED subtrees to get incongruent(get common ancestor -lca)"  
-  $script1 --induce --tree ../Inferred_trees/${out}.nw --tree_labels ${i}.1.txt --no-prune >../tmp/${i}_lca 
+  $script1 --induce --tree ../Inferred_trees/${out}.nw --tree_labels t${i}_d${d}.1.txt --no-prune >../tmp/t${i}_d${d}_lca 
 
   echo "5 calculate the FN (by checking all pairs of correct and incorrect"
-  perl ../../Scripts/FP_counter.pl ${i}.1.txt ../tmp/${i}_lca ../Inferred_trees/${match} >../tmp/FP_depth1_${i}
+  perl ../../Scripts/FP_counter.pl t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match} >>../tmp/FP_depth1_t${i}
 
   echo "6 remove tmp files"
-  rm  ${i}.1.txt ../tmp/${i}_lca ../Inferred_trees/${match}
+  rm  t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match}
 
   echo ""
 done
