@@ -21,11 +21,16 @@ while (<INPUT>)
 	 $seqs[$cells] = $parts[1];
 	 }
 close (INPUT);
-#print("my 4-cell trees available are $Ntrees\n");
+
 my $Ntrees = $cells/4; 	# for trees with le 1000 cells use all 4-cell subtrees
 my $Rtrees = 250;				# for trees with gt 1000 cells use 250 4-cell subtrees (1000 cells in total)
 
-$output = $input; for (1..4) {chop $output}
+#print("my 4-cell trees available are $Ntrees\n");
+
+my @p = split /\//,$input;
+#print("my input is $input file is $p[2]\n");
+
+$output = $p[2]; for (1..4) {chop $output}
 $out1 = "../4cell_trees/$output";
 
 if ($cells <= 1000)
