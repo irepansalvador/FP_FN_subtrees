@@ -32,7 +32,7 @@ source /share/apps/examples/R/R.source
 
 # 9. Parse parameter file to get variables.
 number=$SGE_TASK_ID
-paramfile=/SAN/telfordlab/SEQuoia/FP_FN_subtrees/GESTALT/INPUT/Inferred_trees_subtrees.txt
+paramfile=/SAN/telfordlab/SEQuoia/FP_FN_subtrees/GESTALT/INPUT/GESTALT_simulations.txt
 script1=../../Scripts/newick-tools_subtrees
 
 #-------------- MAKE A LOOP TO PROCESS 100 FILES (samples) PER JOB --------------
