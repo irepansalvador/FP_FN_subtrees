@@ -8,7 +8,7 @@ library(data.tree)
 if (length(args)==0) {
   stop("At least one argument must be supplied (input file).n", call.=FALSE)
 } 
-r = paste(replicate(32, "0"),collapse = "")
+r = paste(replicate(nchar(args[1]), "0"),collapse = "")
 
 ## create dist matrix
 mydist <- stringdistmatrix(c(args[1:4],r), useNames = F)
