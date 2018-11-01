@@ -45,16 +45,33 @@ colnames(all_results) = d
 rownames(all_results)= c(1:1000)
 my_means = apply(all_results, MARGIN = 2, FUN = mean)
 
+## open random dataset
+my_random <- read.csv(file = "Random_alldepths.txt", row.names = 1)
+my_random_mean =  apply(my_random, 2, mean)
 
 ## plot
 
 svg(filename = "NoInter_FP_alldepths_1Ksims_10samples.svg",width = 4,height = 4)
 
-boxplot(all_results[,9:1], ylim= c(0,0.5), 
-        main = "No InterTarget", ylab= "False Positives",
+layout(1:2, heights=c(1, 5))
+# Legend panel
+par(mar=rep(0,4))
+plot(0, 0, type="n", ann=FALSE, axes=FALSE)
+legend("center",c("No dropouts (FAST)", "Random"), horiz=TRUE, title = "False Positives",
+       pch = c(1,4), pt.cex= 1.3, pt.lwd = 1.2, cex = 1, col=c("red","black"),bty = "n")
+# Add extra space to right of plot area; change clipping to figure
+par(mar=c(5,5,0,2))
+
+plot(x = NA, y = NA, xlim = c(1,9), ylim = c(0,1),
+     axes = F, xlab="", ylab=""  )
+grid()
+boxplot(all_results[,9:1], ylim= c(0,1), add=T,
+        main = "", ylab= "False Positives",
         las = 3, boxwex = 0.5, outline = F, notch = T)
 lines(x = my_means[9:1], col = "red", lwd=2)
 points(x = my_means[9:1], col = "red", lwd=2)
-grid()
+
+lines(x = my_random_mean[9:1], col = "black", lwd= 2, lty= 1  )
+points(x = my_random_mean[9:1], col = "black", lwd= 2, pch= 4 )
 
 dev.off()
