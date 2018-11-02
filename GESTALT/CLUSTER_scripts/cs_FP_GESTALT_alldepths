@@ -87,7 +87,7 @@ do
     perl ../../Scripts/FP_counter.pl t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match} >>../tmp/FP_t${i}
 
     echo "6 remove tmp files"
-    rm  t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match}
+    rm  t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match} ../REF_trees/${out}_REF
 
     echo ""
   done
