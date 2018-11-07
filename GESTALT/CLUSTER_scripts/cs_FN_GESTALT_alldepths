@@ -17,7 +17,7 @@
 #$ -t 1-10000:100
 
 # 5. Set the name of the job ($JOB_NAME in line 8).
-#$ -N FN_NoInter_alldepths
+#$ -N FN_GESTALT_alldepths
 
 # 6. Direct STDERR and STDOUT to the same file
 # #$ -j y
@@ -26,12 +26,12 @@
 #$ -tc 100
 
 # 8. Set the working directory to somewhere in your scratch space.
-#$ -wd /SAN/telfordlab/SEQuoia/FP_FN_subtrees/No_InterTarget/WD_cluster/
+#$ -wd /SAN/telfordlab/SEQuoia/FP_FN_subtrees/GESTALT/WD_cluster/
 
 
 # 9. Parse parameter file to get variables.
 number=$SGE_TASK_ID
-paramfile=/SAN/telfordlab/SEQuoia/FP_FN_subtrees/No_InterTarget/INPUT/Inferred_trees.txt
+paramfile=/SAN/telfordlab/SEQuoia/FP_FN_subtrees/GESTALT/INPUT/Inferred_trees.txt
 script1=../../nt-ng-master/newick-tools
 
 #-------------- MAKE A LOOP TO PROCESS 50 FILES (samples) PER JOB --------------
