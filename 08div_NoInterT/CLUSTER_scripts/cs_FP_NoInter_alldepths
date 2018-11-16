@@ -1,0 +1,96 @@
+#!/bin/bash -l
+
+# Batch script to run an array job with the upgraded
+# software stack under SGE.
+
+# 1. Force bash
+#$ -S /bin/bash
+
+# 2. Request ten minutes of wallclock time (format hours:minutes:seconds).
+#$ -l h_rt=1:59:0
+
+# 3. Request RAM.
+#$ -l h_vmem=1.9G,tmem=1.9G
+
+# 4. Set up the job array. In this instance we have requested 10000 tasks
+# numbered 1 to 10000.
+#$ -t 1-1000:10
+
+# 5. Set the name of the job ($JOB_NAME in line 8).
+#$ -N FP_NoInter_alldepths
+
+# 6. Direct STDERR and STDOUT to the same file
+# #$ -j y
+
+# 7. Maximum jobs (to avoid IO overload)
+#$ -tc 100
+
+# 8. Set the working directory to somewhere in your scratch space.
+#$ -wd /SAN/telfordlab/SEQuoia/FP_FN_subtrees/08div_NoInterT/WD_cluster/
+
+
+# 9. Parse parameter file to get variables.
+number=$SGE_TASK_ID
+paramfile=/SAN/telfordlab/SEQuoia/FP_FN_subtrees/08div_NoInterT/INPUT/Inferred_trees.txt
+script1=../../nt-ng-master/newick-tools
+
+#-------------- MAKE A LOOP TO PROCESS 50 FILES (samples) PER JOB --------------
+#-------------------------------------------------------------------------------
+ls /SAN/telfordlab/SEQuoia >/dev/null
+hostname
+date
+
+# do a loop to make 100 for each job
+for (( i=$SGE_TASK_ID; i<$SGE_TASK_ID+10; i++ ))
+do
+ 
+  # delete the file if exists
+  if [ -f ../tmp/FP_t${i} ]
+    then
+    echo "remove output file"
+    rm ../tmp/FP_t${i}
+  fi
+  
+  # loop for all depths of the tree
+  for (( d=1; d<10; d++))
+    do
+    gt=$((2**($d-1)))
+    lt=$(((2**($d))+1))
+
+    p=`sed -n ${i}p $paramfile | awk '{print $1}'`
+    out=${p:0:${#p} - 3} # get the name of the tree and remove the ".nw"
+    match=${out}_match
+
+    echo "1 file is ${p}"
+
+    echo "2- Prune the reference tree"  
+    $script1 --induce --tree ../REF_trees/08div_full_REF.nw --tree_labels ../Inferred_trees/${out}.nw --quiet --output ../REF_trees/${out}_REF
+
+    if [ "$d" -lt "9" ]
+      then
+      echo "3 extract incongruent subtrees depth ${d}"  
+      $script1 --difftree ../Inferred_trees/${out}.nw --tree ../REF_trees/${out}_REF --output t${i}_d${d} --ultrametric --extract --filter_lt ${lt} --filter_gt ${gt} --quiet 2>../Inferred_trees/${match}
+    fi
+
+    if [ "$d" -eq  "9" ]
+      then
+      echo "3 extract incongruent subtrees DEEPEST BRANCH"  
+      $script1 --difftree ../Inferred_trees/${out}.nw --tree ../REF_trees/${out}_REF --output t${i}_d${d} --ultrametric --extract --filter_lt 1000 --filter_gt ${gt} --quiet 2>../Inferred_trees/${match}
+    fi
+    
+    rm t${i}_d${d}.1.svg
+
+    echo "4 pruned INFERRED subtrees to get incongruent(get common ancestor -lca)"  
+    $script1 --induce --tree ../Inferred_trees/${out}.nw --tree_labels t${i}_d${d}.1.txt --no-prune >../tmp/t${i}_d${d}_lca 
+
+    echo "5 calculate the FN (by checking all pairs of correct and incorrect"
+    perl ../../Scripts/FP_counter.pl t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match} >>../tmp/FP_t${i}
+
+    echo "6 remove tmp files"
+    rm  t${i}_d${d}.1.txt ../tmp/t${i}_d${d}_lca ../Inferred_trees/${match} ../REF_trees/${out}_REF 
+
+    echo ""
+  done
+done
+
+date
