@@ -1,0 +1,56 @@
+#!/bin/bash -l
+
+# Batch script to run an array job with the upgraded
+# software stack under SGE.
+
+# 1. Force bash
+#$ -S /bin/bash
+
+# 2. Request ten minutes of wallclock time (format hours:minutes:seconds).
+#$ -l h_rt=17:59:0
+
+# 3. Request RAM.
+#$ -l h_vmem=1.9G,tmem=1.9G
+
+# 4. Set up the job array. In this instance we have requested 10000 tasks
+# numbered 1 to 10000.
+#$ -t 1-15000:5 
+
+# 5. Set the name of the job ($JOB_NAME in line 8).
+#$ -N GESTALT_4cell_SHUFFLED
+
+# 6. Direct STDERR and STDOUT to the same file
+#$ -j y
+
+# 7. Maximum jobs (to avoid IO overload)
+# #$ -tc 100
+
+# 8. Set the working directory to somewhere in your scratch space.
+#$ -wd /SAN/telfordlab/SEQuoia/FP_FN_subtrees/GESTALT/WD_cluster/
+
+source /share/apps/examples/R/R.source
+
+# 9. Parse parameter file to get variables.
+number=$SGE_TASK_ID
+paramfile=/SAN/telfordlab/SEQuoia/FP_FN_subtrees/GESTALT/INPUT/GESTALT_simulations.txt
+script1=../../Scripts/newick-tools_subtrees
+
+#-------------- MAKE A LOOP TO PROCESS 100 FILES (samples) PER JOB --------------
+#-------------------------------------------------------------------------------
+ls /SAN/telfordlab/SEQuoia >/dev/null
+hostname
+date
+
+# do a loop to make 5 for each job
+for (( i=$SGE_TASK_ID; i<$SGE_TASK_ID+5; i++ ))
+do
+ 
+  p=`sed -n ${i}p $paramfile | awk '{print $1}'`
+  echo "${i} file is ${p}"
+
+  echo "perl ../../Scripts/4cell_subtrees_sampler_SHUFFLED.pl ../simulations/${p}"
+  perl ../../Scripts/4cell_subtrees_sampler_SHUFFLED.pl ../simulations/${p}
+
+done
+
+date
